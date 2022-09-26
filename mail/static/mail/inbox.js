@@ -59,25 +59,42 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
-  
+
 }
 
 function display_inbox(contents) {
   const post = document.createElement('div');
   post.className = 'email-entry';
-  post.innerHTML = '<ul class="list-group list-group-horizontal border border-dark rounded-0">'
-    + '<li class="list-group-item col-3 border-0 font-weight-bold  text-left">' + contents.sender
-    + '</li><li class="list-group-item col-6 border-0">' + contents.subject
-    + '</li><li class="list-group-item col-3 border-0 text-right">' + contents.timestamp
-    + '</li></ul>';
+  if (contents.read) {
+    post.innerHTML = '<ul class="list-group list-group-horizontal border border-dark rounded-0">'
+      + '<li class="list-group-item col-3 border-0 font-weight-bold  text-left list-group-item-secondary">' + contents.sender
+      + '</li><li class="list-group-item col-6 border-0 list-group-item-secondary">' + contents.subject
+      + '</li><li class="list-group-item col-3 border-0 text-right list-group-item-secondary">' + contents.timestamp
+      + '</li></ul>';
+  } else {
+    post.innerHTML = '<ul class="list-group list-group-horizontal border border-dark rounded-0">'
+      + '<li class="list-group-item col-3 border-0 font-weight-bold  text-left">' + contents.sender
+      + '</li><li class="list-group-item col-6 border-0">' + contents.subject
+      + '</li><li class="list-group-item col-3 border-0 text-right">' + contents.timestamp
+      + '</li></ul>';
+  }
+
   post.addEventListener('click', () => open_email(contents.id));
-  document.querySelector('#emails-view').append(post)
+  document.querySelector('#emails-view').append(post);
 }
 
 function open_email(email_id) {
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#email-indv-view').style.display = 'block';
+
+  // mark the email as read
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      read: true
+    })
+  })
 
   fetch(`/emails/${email_id}`)
     .then(response => response.json())
@@ -89,5 +106,33 @@ function open_email(email_id) {
       <p><span class="font-weight-bold">Timestamp: </span>${email.timestamp}</p>
       <hr><p>${email.body}</p>
       `;
+
+      const archive = document.createElement('button');
+      // archive.className = 'btn btn-sm btn-outline-primary';
+      archive.innerHTML = !email.archived ? 'Archive' : 'Unarchive';
+      archive.addEventListener('click', () => {
+        fetch(`/emails/${email_id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            archived: !email.archived
+          })
+        }).then(() => load_mailbox('inbox'));
+      });
+      document.querySelector('#email-indv-view').append(archive);
+
+      const read = document.createElement('button');
+      // archive.className = 'btn btn-sm btn-outline-primary';
+      read.innerHTML = 'Mark as Unread'
+      read.addEventListener('click', () => {
+        fetch(`/emails/${email_id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            read: false
+          })
+        })
+      });
+      document.querySelector('#email-indv-view').append(read);
     });
+
+
 }
