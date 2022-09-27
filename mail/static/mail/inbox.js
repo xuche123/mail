@@ -39,6 +39,7 @@ function send_email(event) {
     .then(response => response.json())
     .then(result => {
       console.log(result);
+      load_mailbox('inbox');
     });
 }
 
@@ -132,6 +133,17 @@ function open_email(email_id) {
         })
       });
       document.querySelector('#email-indv-view').append(read);
+
+      const reply = document.createElement('button');
+      reply.innerHTML = 'Reply'
+      reply.addEventListener('click', () => {
+        compose_email();
+        document.querySelector('#email-indv-view').style.display = 'none';
+        document.querySelector('#compose-recipients').value = email.sender;
+        document.querySelector('#compose-subject').value = email.subject.startsWith('Re: ') ? email.subject : 'Re: ' + email.subject;
+        document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote:\n` + email.body;
+      });
+      document.querySelector('#email-indv-view').append(reply);
     });
 
 
