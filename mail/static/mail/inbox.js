@@ -39,7 +39,7 @@ function send_email(event) {
     .then(response => response.json())
     .then(result => {
       console.log(result);
-      load_mailbox('inbox');
+      load_mailbox('sent');
     });
 }
 
@@ -101,7 +101,7 @@ function open_email(email_id) {
     .then(response => response.json())
     .then(email => {
       console.log(email)
-      document.querySelector('#email-indv-view').innerHTML = `<p><span class="font-weight-bold">From: </span>${email.subject}</p>
+      document.querySelector('#email-indv-view').innerHTML = `<p><span class="font-weight-bold">From: </span>${email.sender}</p>
       <p><span class="font-weight-bold">To: </span>${email.recipients}</p>
       <p><span class="font-weight-bold">Subject: </span>${email.subject}</p>
       <p><span class="font-weight-bold">Timestamp: </span>${email.timestamp}</p>
